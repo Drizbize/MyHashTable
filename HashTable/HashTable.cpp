@@ -2,55 +2,82 @@
 //
 
 #include <iostream>
+#include <list>
+
+struct Node
+{
+	int key;
+	int value;
+};
 
 class HashTable
 {
-	int *array = nullptr;
-	const int ARRAY_SIZE = 10;
+	std::list<Node> *array = nullptr;
+	int array_size = 10;
 
 	int Hash_func(int key)
 	{
-		int hash_code = key % ARRAY_SIZE;
+		int hash_code = key % array_size;
 		return hash_code;
 	}
+
 public:
 	void Add(int key, int value)
 	{
 		if (!array)
 		{
-			array = new int[ARRAY_SIZE];
-			for (int i = 0; i < ARRAY_SIZE; i++)
-			{
-				array[i] = 0;
-			}
+			array = new std::list<Node>[array_size];
 		}
-		array[Hash_func(key)] = value;
+		array[Hash_func(key)].push_back({ key, value });
+	}
+
+	void SetArraySize(int size)
+	{
+		array_size = size;
+		if (!array)
+		{
+			array = new std::list<Node>[array_size];
+		}
+
+		array->resize(array_size);
 	}
 
 	void Print()
 	{
-		for (int i = 0; i < ARRAY_SIZE; i++)
+		for (int i = 0; i < array_size; i++)
 		{
-			std::cout << array[i] << "\n";
+			std::cout << "[" << i << "]:";
+			for (auto iter = array[i].begin(); iter != array[i].end(); iter++)
+			{
+				Node itter = *iter;
+				std::cout << " " << itter.value;
+			}
+			std::cout << "\n";
 		}
 	}
 
-	int FindAt(int index)
+	int Find(int key)
 	{
-		int Number = array[Hash_func(index)];
-		return Number;
-	}
+		int size = array[Hash_func(key)].size();
 
-	int Find(int FindNumber)
-	{
-		for (int i = 0; i < ARRAY_SIZE; i++)
+		if (size == 0)
 		{
-			if (array[i] == FindNumber)
+			return -1;
+		}
+		else if (size == 1)
+		{
+			return (*array[Hash_func(key)].begin()).value;
+		}
+		else
+		{ 
+			for (Node& i : array[Hash_func(key)])
 			{
-				return i;
+				if (i.key)
+				{
+					return i.value;
+				}
 			}
 		}
-		return -1;
 	}
 };
 
@@ -59,8 +86,9 @@ int main()
 	HashTable h;
 	h.Add(0, 1);
 	h.Add(10, 2);
-	h.Add(11, 3);
+	h.Add(13, 4);
+	h.Add(13, 5);
+	h.Add(12, 5);
+	h.Add(12, 50);
 	h.Print();
-	std::cout << h.FindAt(11) << "\n";
-	std::cout << h.Find(3) << "\n";
 }
